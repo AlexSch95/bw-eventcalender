@@ -4,7 +4,9 @@ function EventForm({ event, onClose, onSave }) {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [startDate, setStartDate] = useState('')
+    const [startTime, setStartTime] = useState('00:00')
     const [endDate, setEndDate] = useState('')
+    const [endTime, setEndTime] = useState('23:59')
     const [color, setColor] = useState('#dc2626')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -13,8 +15,12 @@ function EventForm({ event, onClose, onSave }) {
         if (event) {
             setTitle(event.title)
             setDescription(event.description || '')
-            setStartDate(event.startDate.split('T')[0])
-            setEndDate(event.endDate.split('T')[0])
+            const start = new Date(event.startDate)
+            const end = new Date(event.endDate)
+            setStartDate(start.toISOString().split('T')[0])
+            setStartTime(start.toTimeString().slice(0, 5))
+            setEndDate(end.toISOString().split('T')[0])
+            setEndTime(end.toTimeString().slice(0, 5))
             setColor(event.color)
         }
     }, [event])
@@ -23,8 +29,11 @@ function EventForm({ event, onClose, onSave }) {
         e.preventDefault()
         setError('')
 
-        if (new Date(endDate) < new Date(startDate)) {
-            setError('Enddatum darf nicht vor dem Startdatum liegen')
+        const startDateTime = new Date(`${startDate}T${startTime}`)
+        const endDateTime = new Date(`${endDate}T${endTime}`)
+
+        if (endDateTime < startDateTime) {
+            setError('Ende darf nicht vor dem Start liegen')
             return
         }
 
@@ -41,8 +50,8 @@ function EventForm({ event, onClose, onSave }) {
                 body: JSON.stringify({
                     title,
                     description: description || null,
-                    startDate: new Date(startDate).toISOString(),
-                    endDate: new Date(endDate + 'T23:59:59').toISOString(),
+                    startDate: startDateTime.toISOString(),
+                    endDate: endDateTime.toISOString(),
                     color
                 })
             })
@@ -134,12 +143,39 @@ function EventForm({ event, onClose, onSave }) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Startzeit *
+                            </label>
+                            <input
+                                type="time"
+                                value={startTime}
+                                onChange={(e) => setStartTime(e.target.value)}
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
                                 Enddatum *
                             </label>
                             <input
                                 type="date"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Endzeit *
+                            </label>
+                            <input
+                                type="time"
+                                value={endTime}
+                                onChange={(e) => setEndTime(e.target.value)}
                                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                                 required
                             />

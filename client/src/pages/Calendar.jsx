@@ -55,6 +55,14 @@ function Calendar() {
         })
     }
 
+    const formatTime = (date) => {
+        if (!date) return ''
+        return new Date(date).toLocaleTimeString('de-DE', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    }
+
     return (
         <div className="min-h-screen bg-gray-900 p-4 md:p-8">
             <header className="mb-8 text-center">
@@ -101,12 +109,12 @@ function Calendar() {
                         <div className="space-y-3 text-gray-300">
                             <div>
                                 <span className="text-primary-400 font-semibold">Start:</span>
-                                <p>{formatDate(selectedEvent.start)}</p>
+                                <p>{formatDate(selectedEvent.start)} um {formatTime(selectedEvent.start)} Uhr</p>
                             </div>
 
                             <div>
                                 <span className="text-primary-400 font-semibold">Ende:</span>
-                                <p>{formatDate(selectedEvent.end)}</p>
+                                <p>{formatDate(selectedEvent.end)} um {formatTime(selectedEvent.end)} Uhr</p>
                             </div>
 
                             {selectedEvent.description && (
