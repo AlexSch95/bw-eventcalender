@@ -89,6 +89,7 @@ function Calendar() {
                             right: 'dayGridMonth,dayGridWeek'
                         }}
                         height="auto"
+                        fixedWeekCount={false}
                         eventDisplay="block"
                         displayEventTime={true}
                         eventTimeFormat={{

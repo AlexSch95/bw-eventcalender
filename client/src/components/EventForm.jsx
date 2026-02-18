@@ -226,11 +226,10 @@ function EventForm({ event, onClose, onSave }) {
                                             <button
                                                 type="button"
                                                 onClick={() => toggleDay(day.key)}
-                                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-[100px] ${
-                                                    selectedDays[day.key]
+                                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-[100px] ${selectedDays[day.key]
                                                         ? 'bg-primary-600 text-white'
                                                         : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 {day.label}
                                             </button>

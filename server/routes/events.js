@@ -66,14 +66,14 @@ router.post('/recurring', authMiddleware, async (req, res) => {
         // Iteriere durch jeden Tag im Zeitraum
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             const dayOfWeek = d.getDay();
-            
+
             // Finde den passenden Wochentag
             for (const [dayKey, times] of Object.entries(days)) {
                 if (dayMap[dayKey] === dayOfWeek) {
                     const eventDate = d.toISOString().split('T')[0];
                     const eventStart = new Date(`${eventDate}T${times.start}`);
                     const eventEnd = new Date(`${eventDate}T${times.end}`);
-                    
+
                     events.push({
                         title,
                         description: description || null,
