@@ -45,6 +45,61 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
+// Create recurring events (admin only)
+router.post('/recurring', authMiddleware, async (req, res) => {
+    try {
+        const { title, description, color, recurringStart, recurringEnd, days } = req.body;
+
+        if (!title || !recurringStart || !recurringEnd || !days || Object.keys(days).length === 0) {
+            return res.status(400).json({ error: 'Titel, Zeitraum und mindestens ein Wochentag erforderlich' });
+        }
+
+        const dayMap = {
+            sunday: 0, monday: 1, tuesday: 2, wednesday: 3,
+            thursday: 4, friday: 5, saturday: 6
+        };
+
+        const startDate = new Date(recurringStart);
+        const endDate = new Date(recurringEnd);
+        const events = [];
+
+        // Iteriere durch jeden Tag im Zeitraum
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const dayOfWeek = d.getDay();
+            
+            // Finde den passenden Wochentag
+            for (const [dayKey, times] of Object.entries(days)) {
+                if (dayMap[dayKey] === dayOfWeek) {
+                    const eventDate = d.toISOString().split('T')[0];
+                    const eventStart = new Date(`${eventDate}T${times.start}`);
+                    const eventEnd = new Date(`${eventDate}T${times.end}`);
+                    
+                    events.push({
+                        title,
+                        description: description || null,
+                        startDate: eventStart.toISOString(),
+                        endDate: eventEnd.toISOString(),
+                        color: color || '#dc2626'
+                    });
+                }
+            }
+        }
+
+        // Füge alle Events in die DB ein
+        for (const event of events) {
+            await pool.query(
+                'INSERT INTO events (title, description, start_date, end_date, color) VALUES ($1, $2, $3, $4, $5)',
+                [event.title, event.description, event.startDate, event.endDate, event.color]
+            );
+        }
+
+        res.json({ message: `${events.length} Events erstellt` });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Serverfehler' });
+    }
+});
+
 // Update event (admin only)
 router.put('/:id', authMiddleware, async (req, res) => {
     try {
