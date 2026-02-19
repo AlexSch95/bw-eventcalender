@@ -76,6 +76,19 @@ function EventForm({ event, onClose, onSave }) {
                     throw new Error('Mindestens einen Wochentag auswählen')
                 }
 
+                // Konvertiere die Zeiten zu ISO-Strings (gleiche Logik wie bei Einzelterminen)
+                const convertedDays = {}
+                for (const [dayKey, times] of Object.entries(selectedDays)) {
+                    // Dummy-Datum für Zeitkonvertierung (wird auf dem Server ersetzt)
+                    const dummyDate = '2024-01-01'
+                    const startDT = new Date(`${dummyDate}T${times.start}`)
+                    const endDT = new Date(`${dummyDate}T${times.end}`)
+                    convertedDays[dayKey] = {
+                        startISO: startDT.toISOString(),
+                        endISO: endDT.toISOString()
+                    }
+                }
+
                 const res = await fetch('/api/events/recurring', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -86,7 +99,7 @@ function EventForm({ event, onClose, onSave }) {
                         color,
                         recurringStart,
                         recurringEnd,
-                        days: selectedDays
+                        days: convertedDays
                     })
                 })
 
@@ -227,8 +240,8 @@ function EventForm({ event, onClose, onSave }) {
                                                 type="button"
                                                 onClick={() => toggleDay(day.key)}
                                                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-[100px] ${selectedDays[day.key]
-                                                        ? 'bg-primary-600 text-white'
-                                                        : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                                                    ? 'bg-primary-600 text-white'
+                                                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
                                                     }`}
                                             >
                                                 {day.label}

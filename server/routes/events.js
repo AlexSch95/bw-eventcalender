@@ -70,15 +70,25 @@ router.post('/recurring', authMiddleware, async (req, res) => {
             // Finde den passenden Wochentag
             for (const [dayKey, times] of Object.entries(days)) {
                 if (dayMap[dayKey] === dayOfWeek) {
-                    const eventDate = d.toISOString().split('T')[0];
-                    const eventStart = new Date(`${eventDate}T${times.start}`);
-                    const eventEnd = new Date(`${eventDate}T${times.end}`);
+                    // Lokales Datum extrahieren (nicht UTC)
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const eventDate = `${year}-${month}-${day}`;
+
+                    // Zeit aus den vom Client konvertierten ISO-Strings extrahieren
+                    // Client sendet: { startISO: "2024-01-01T15:00:00.000Z", endISO: "2024-01-01T17:00:00.000Z" }
+                    const startTime = times.startISO.split('T')[1]; // z.B. "15:00:00.000Z"
+                    const endTime = times.endISO.split('T')[1];
+
+                    const startDateTime = `${eventDate}T${startTime}`;
+                    const endDateTime = `${eventDate}T${endTime}`;
 
                     events.push({
                         title,
                         description: description || null,
-                        startDate: eventStart.toISOString(),
-                        endDate: eventEnd.toISOString(),
+                        startDate: startDateTime,
+                        endDate: endDateTime,
                         color: color || '#dc2626'
                     });
                 }
